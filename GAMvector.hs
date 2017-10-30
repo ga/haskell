@@ -1,3 +1,8 @@
+
+module GAMvector
+   (mv, longMv, outerProd, projGrade, scalarPart, mvReverse, mvBar, mvEven, mvOdd, mvFilter, outermorph, Multivector, realToMv)
+   where
+
 import GABlade
 import Data.List
 import Data.Char
@@ -24,7 +29,7 @@ Need a function to convert these to either an Int or an Integer
 Rely on choice of mv or longMv to cast the result
 -}
 
---Converts string "E1E2" into [(E,1), (E,2)] etc.
+--Converts string "E1E2" into [(E,1), (E,2)] etc. Assuming that Int is big enough for the dimension of the space.
 bldRead :: String -> [(Char,Int)] 
 bldRead [] = []
 bldRead st = (ef,n): (bldRead st')
@@ -38,9 +43,10 @@ basisVec2Bld (ch,n)
   | ch == 'E' = (2^(2*(n-1)),1)
   | ch == 'F' = (2^(2*n-1),1)
   | otherwise = error("invalid blade definition") 
-                
-                
---Takes the full string and converts to the equivalent blade (Int/Integer n, +-1).                
+
+
+--Takes the full string and converts to the equivalent blade (Int/Integer n, +-1). 
+--Use bladeProd here to allow for strings to be entered in non-canonical order. Can then track the correct sign.                
 str2Bld :: (Integral n) => String -> (n,Int)
 str2Bld str = foldl' bladeProd (0,1) lst
   where lst = map basisVec2Bld $ bldRead str
@@ -134,19 +140,23 @@ mvBar (Mv xs) = Mv (map bldBar xs)
           | even (bladeGrade n)= (n,x) 
           | otherwise = (n,negate x)        
 
+--Keep even elements
 mvEven :: (Integral n, Num a) => Multivector n a -> Multivector n a       
 mvEven (Mv xs) = Mv (filter bldEven xs)
   where bldEven(n,_) = even (bladeGrade n)
 
+--Keep odd elements
 mvOdd :: (Integral n, Num a) => Multivector n a -> Multivector n a       
 mvOdd (Mv xs) = Mv (filter bldOdd xs)
   where bldOdd(n,_) = odd (bladeGrade n)
         
+--Filter on cofficient
 mvFilter :: (Integral n, Num a) => (a -> Bool) -> Multivector n a -> Multivector n a       
 mvFilter f (Mv xs) = Mv (filter mvFilter' xs)
   where mvFilter' (_,x) = f x
 
-
+realToMv :: (Integral n, Num a) => a -> Multivector n a
+realToMv x = Mv [(0,x)]
 
 --Outermorphism
 --Assume have a function f that takes grade 1 to grade 1
