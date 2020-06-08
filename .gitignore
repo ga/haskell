@@ -18,8 +18,12 @@ $RECYCLE.BIN/
 *.lnk
 
 # =========================
-# Operating System Files
+# Haskell Files
 # =========================
+
+*.hi
+*.o
+example
 
 # OSX
 # =========================
